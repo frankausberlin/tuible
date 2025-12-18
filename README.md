@@ -1,3 +1,6 @@
+This is a little vibe-coding-test with kilocode / x-ai code fast 1
+
+
 # clitable
 
 A Python package for printing formatted CLI tables with ANSI colors.
