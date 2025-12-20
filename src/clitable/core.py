@@ -20,15 +20,15 @@ def print_line(
         columns: List of column values to print.
         colsize: Column size(s). If int, applies to all columns. If list, per column.
         color1: ANSI color code for borders (default: '36' cyan).
-        color2: ANSI color code for data (default: '35' magenta).
-        format_style: Additional style for data (e.g., '4;' for underline).
-        is_centered: Whether to center-align the data.
+        color2: ANSI color code for body (default: '35' magenta).
+        format_style: Additional style for body (e.g., '4;' for underline).
+        is_centered: Whether to center-align the body.
     """
     params = CliTableParams()
     params.format_edge['color'] = color1
-    params.format_data['color'] = color2
-    params.format_data['esc'] = format_style
-    params.format_data['align'] = 'center' if is_centered else 'left'
+    params.format_body['color'] = color2
+    params.format_body['esc'] = format_style
+    params.format_body['align'] = 'center' if is_centered else 'left'
     
     if isinstance(colsize, int):
         params.size = colsize
@@ -37,9 +37,9 @@ def print_line(
         params.column_widths = colsize
         params.column_count = len(columns)
 
-    # Prepare data mode
-    params.mode_stack = ['data']
-    params.mode_columns['data'] = [[str(col)] for col in columns]
+    # Prepare body mode
+    params.mode_stack = ['body']
+    params.mode_columns['body'] = [[str(col)] for col in columns]
     
     table = CliTable(params)
     table.execute()
@@ -51,7 +51,7 @@ def print_block(
     color1: str = '36',
     color2: str = '35',
     format_style: str = '',
-    format_header: str = '4;',
+    format_head: str = '4;',
     is_centered: bool = False
 ) -> None:
     """
@@ -61,40 +61,40 @@ def print_block(
         rows: List of rows, each row is a list of columns.
         colsize: Column size. -1 for auto-size based on longest entry.
         color1: ANSI color code for borders (default: '36' cyan).
-        color2: ANSI color code for data (default: '35' magenta).
-        format_style: Additional style for data rows.
-        format_header: Style for header row (default: '4;' underline).
-        is_centered: Whether to center-align the data.
+        color2: ANSI color code for body (default: '35' magenta).
+        format_style: Additional style for body rows.
+        format_head: Style for head row (default: '4;' underline).
+        is_centered: Whether to center-align the body.
     """
     if not rows:
         return
 
     params = CliTableParams()
     params.format_edge['color'] = color1
-    params.format_data['color'] = color2
-    params.format_data['esc'] = format_style
-    params.format_data['align'] = 'center' if is_centered else 'left'
-    params.format_header['esc'] = format_header
+    params.format_body['color'] = color2
+    params.format_body['esc'] = format_style
+    params.format_body['align'] = 'center' if is_centered else 'left'
+    params.format_head['esc'] = format_head
     params.size = colsize
     
-    # In CliTableParams, data is stored as columns: List[List[str]]
+    # In CliTableParams, body is stored as columns: List[List[str]]
     # We need to transpose rows to columns
     num_cols = len(rows[0])
-    header_row = rows[0]
-    data_rows = rows[1:]
+    head_row = rows[0]
+    body_rows = rows[1:]
     
-    params.mode_stack = ['header', 'data']
+    params.mode_stack = ['head', 'body']
     
-    # Header columns
-    params.mode_columns['header'] = [[str(cell)] for cell in header_row]
+    # head columns
+    params.mode_columns['head'] = [[str(cell)] for cell in head_row]
     
-    # Data columns
-    data_cols = [[] for _ in range(num_cols)]
-    for row in data_rows:
+    # body columns
+    body_cols = [[] for _ in range(num_cols)]
+    for row in body_rows:
         for i in range(num_cols):
             val = str(row[i]) if i < len(row) else ""
-            data_cols[i].append(val)
-    params.mode_columns['data'] = data_cols
+            body_cols[i].append(val)
+    params.mode_columns['body'] = body_cols
     
     params.column_count = num_cols
     
@@ -103,44 +103,44 @@ def print_block(
 
 
 def print_table(
-    headers: Optional[List[str]] = None,
-    data: Optional[List[List[str]]] = None,
+    heads: Optional[List[str]] = None,
+    body: Optional[List[List[str]]] = None,
     colsize: int = -1
 ) -> None:
     """
-    Print a complete table with optional headers, data, and borders.
+    Print a complete table with optional heads, body, and borders.
 
     Args:
-        headers: List of header strings
-        data: List of data rows
+        heads: List of head strings
+        body: List of body rows
         colsize: Column size (-1 for auto)
     """
     rows = []
-    if headers:
-        rows.append(headers)
-    if data:
-        rows.extend(data)
+    if heads:
+        rows.append(heads)
+    if body:
+        rows.extend(body)
     
     if not rows:
         return
 
     params = CliTableParams()
     params.size = colsize
-    params.mode_stack = ['top', 'header', 'data', 'bottom']
+    params.mode_stack = ['top', 'head', 'body', 'bot']
     
     num_cols = len(rows[0])
     params.column_count = num_cols
     
-    if headers:
-        params.mode_columns['header'] = [[str(cell)] for cell in headers]
+    if heads:
+        params.mode_columns['head'] = [[str(cell)] for cell in heads]
     
-    if data:
-        data_cols = [[] for _ in range(num_cols)]
-        for row in data:
+    if body:
+        body_cols = [[] for _ in range(num_cols)]
+        for row in body:
             for i in range(num_cols):
                 val = str(row[i]) if i < len(row) else ""
-                data_cols[i].append(val)
-        params.mode_columns['data'] = data_cols
+                body_cols[i].append(val)
+        params.mode_columns['body'] = body_cols
     
     table = CliTable(params)
     table.execute()

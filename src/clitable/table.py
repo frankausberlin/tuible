@@ -8,12 +8,12 @@ class CliTable:
     """CLI Table Generator
 
     This class handles the rendering and execution of formatted CLI tables based on CliTableParams.
-    It provides methods for generating table borders, headers, and data rows with customizable
+    It provides methods for generating table borders, heads, and body rows with customizable
     formatting, colors, and alignments.
 
     Key Features:
     - Border rendering (top/bottom edges with customizable symbols)
-    - Header and data row rendering with alignment support
+    - head and body row rendering with alignment support
     - Dynamic column width calculation based on content
     - ANSI color and style support for visual formatting
     - Support for no-border mode for compact output
@@ -34,7 +34,7 @@ class CliTable:
             # Execute rendering based on mode stack
             table.execute()
 
-    The class processes a mode stack that can include 'top', 'header', 'data', and 'bottom'
+    The class processes a mode stack that can include 'top', 'head', 'body', and 'bot'
     modes in any combination, allowing flexible table composition.
     """
 
@@ -119,34 +119,34 @@ class CliTable:
         line += self.params.format_edge['symbol_bottomright'] + reset
         print(line)
     
-    def render_header(self) -> None:
-        """Render header rows from columns."""
-        if 'header' not in self.params.mode_columns or not self.params.mode_columns['header']:
+    def render_head(self) -> None:
+        """Render head rows from columns."""
+        if 'head' not in self.params.mode_columns or not self.params.mode_columns['head']:
             return
 
-        columns = self.params.mode_columns['header']
+        columns = self.params.mode_columns['head']
         max_rows = len(columns[0]) if columns else 0
 
         for row_idx in range(max_rows):
-            self._render_row(row_idx, columns, is_header=True)
+            self._render_row(row_idx, columns, is_head=True)
     
-    def render_data(self) -> None:
-        """Render data rows from columns."""
-        if 'data' not in self.params.mode_columns or not self.params.mode_columns['data']:
+    def render_body(self) -> None:
+        """Render body rows from columns."""
+        if 'body' not in self.params.mode_columns or not self.params.mode_columns['body']:
             return
 
-        columns = self.params.mode_columns['data']
+        columns = self.params.mode_columns['body']
         max_rows = len(columns[0]) if columns else 0
 
         for row_idx in range(max_rows):
-            self._render_row(row_idx, columns, is_header=False)
+            self._render_row(row_idx, columns, is_head=False)
     
-    def _render_row(self, row_idx: int, columns: List[List[str]], is_header: bool = False) -> None:
-        """Render a single row of data."""
-        format_dict = self.params.format_header if is_header else self.params.format_data
+    def _render_row(self, row_idx: int, columns: List[List[str]], is_head: bool = False) -> None:
+        """Render a single row of body."""
+        format_dict = self.params.format_head if is_head else self.params.format_body
 
         edge_color = f"\x1b[{self.params.format_edge['color']}m"
-        data_color = f"\x1b[{format_dict['esc']}{format_dict['color']}m"
+        body_color = f"\x1b[{format_dict['esc']}{format_dict['color']}m"
         reset = "\x1b[0m"
 
         # Start with left border
@@ -160,7 +160,7 @@ class CliTable:
             width = self.params.column_widths[col_idx] if self.params.column_widths else self.params.size
             aligned_text = self._align_text(cell_text, width, format_dict['align'])
 
-            print(data_color + aligned_text + reset, end='')
+            print(body_color + aligned_text + reset, end='')
 
             # Print column separator if not the last column (always, even with no_border for inner grid)
             if col_idx < len(columns) - 1:
@@ -179,9 +179,9 @@ class CliTable:
                 executed_modes.add(mode)
                 if mode == 'top':
                     self.render_top()
-                elif mode == 'bottom':
+                elif mode == 'bot':
                     self.render_bottom()
-                elif mode == 'header':
-                    self.render_header()
-                elif mode == 'data':
-                    self.render_data()
+                elif mode == 'head':
+                    self.render_head()
+                elif mode == 'body':
+                    self.render_body()

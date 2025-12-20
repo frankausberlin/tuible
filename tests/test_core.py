@@ -48,7 +48,7 @@ class TestPrintLine:
     @patch('sys.stdout', new_callable=StringIO)
     def test_print_line_custom_colors(self, mock_stdout):
         """Test print_line with custom colors."""
-        columns = ['Data']
+        columns = ['body']
         print_line(columns, color1='31', color2='32')
         output = mock_stdout.getvalue()
         assert '\x1b[31m' in output
@@ -99,17 +99,17 @@ class TestPrintBlock:
     @patch('sys.stdout', new_callable=StringIO)
     def test_print_block_centered(self, mock_stdout):
         """Test print_block with centered alignment."""
-        rows = [['Header'], ['Data']]
+        rows = [['head'], ['body']]
         print_block(rows, is_centered=True, colsize=10)
         output = strip_ansi(mock_stdout.getvalue())
-        assert '  Header  ' in output
-        assert '   Data   ' in output
+        assert '  head  ' in output
+        assert '   body   ' in output
 
     @patch('sys.stdout', new_callable=StringIO)
-    def test_print_block_custom_header_format(self, mock_stdout):
-        """Test print_block with custom header format."""
+    def test_print_block_custom_head_format(self, mock_stdout):
+        """Test print_block with custom head format."""
         rows = [['H1', 'H2'], ['D1', 'D2']]
-        print_block(rows, format_header='1;4;')  # Bold underline
+        print_block(rows, format_head='1;4;')  # Bold underline
         output = mock_stdout.getvalue()
         assert '\x1b[1;4;104m' in output
 
@@ -128,10 +128,10 @@ class TestPrintTable:
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_print_table_full(self, mock_stdout):
-        """Test print_table with headers and data."""
-        headers = ['H1', 'H2']
-        data = [['D1', 'D2']]
-        print_table(headers, data)
+        """Test print_table with heads and body."""
+        heads = ['H1', 'H2']
+        body = [['D1', 'D2']]
+        print_table(heads, body)
         output = strip_ansi(mock_stdout.getvalue())
         assert '┏' in output
         assert 'H1' in output

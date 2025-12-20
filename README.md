@@ -1,4 +1,4 @@
-# clitable
+# Clitable
 
 A Python package for printing formatted CLI tables with ANSI colors.
 
@@ -7,9 +7,8 @@ A Python package for printing formatted CLI tables with ANSI colors.
 - Print single table lines or multi-row table blocks
 - ANSI color support for borders and data
 - Customizable column widths and alignment
-- Header formatting with underline styles
+- head formatting with underline styles
 - Auto-sizing based on content
-- Command-line interface with mode-stack support
 - Multi-row cells using colon prefix syntax
 
 ## Installation
@@ -43,7 +42,7 @@ rows = [
 print_block(rows, colsize=-1)  # Auto-size columns
 
 # Print a full table with borders
-print_table(headers=['Name', 'Age'], data=[['John', '25'], ['Jane', '30']])
+print_table(heads=['Name', 'Age'], body=[['John', '25'], ['Jane', '30']])
 ```
 
 ### Command Line
@@ -51,31 +50,34 @@ print_table(headers=['Name', 'Age'], data=[['John', '25'], ['Jane', '30']])
 The CLI uses a mode-based approach where you can stack different parts of the table.
 
 ```bash
-# Print a single data line
-clitable data "Name" "Age" "City"
+# Print a single body line
+clitable body "Name" "Age" "City"
 
-# Print a header and data
-clitable header "Name" "Age" data "John" "25"
+# Print a header and body
+clitable head "Name" "Age" body "John" "25"
 
 # Print a full table with borders
-clitable top header "Name" "Age" data "John" "25" bottom -cc 2
+clitable top head "Name" "Age" body "John" "25" bot -cc 2
 
 # With custom colors and formatting
-clitable data -ce 31 -cd 32 "Red Border" "Green Data"
+clitable body -ce 31 -cb 32 "Red Border" "Green body"
+
+# The order doesn't matter.
+clitable body b1 head h1
 ```
 
 #### Modes
-- `data`: Print data line
-- `header`: Print header line
+- `body`: Print body line
+- `head`: Print head line
 - `top`: Print top border
-- `bottom`: Print bottom border
+- `bot`: Print bottom border
 
 #### Options
 - `-ce <color>`: Set edge color (e.g., 34 for blue)
-- `-cd <color>`: Set data color (e.g., 32 for green)
-- `-ch <color>`: Set header color (e.g., 33 for yellow)
-- `-fd <style>`: Set data style (e.g., 4 for underline)
-- `-fh <style>`: Set header style
+- `-cb <color>`: Set body color (e.g., 32 for green)
+- `-ch <color>`: Set head color (e.g., 33 for yellow)
+- `-fb <style>`: Set body style (e.g., 4 for underline)
+- `-fh <style>`: Set head style
 - `-fe <chars>`: Set edge characters (8 chars: left-right, top-bottom, corners, middle)
 - `-size <num>`: Set column width (-1 for dynamic)
 - `-cc <num>`: Set column count
@@ -85,7 +87,7 @@ clitable data -ce 31 -cd 32 "Red Border" "Green Data"
 Elements starting with `:` are treated as continuations in the same column, allowing multi-row content within a single table column.
 
 ```bash
-clitable data "Row 1" ":Row 2" "Other Col"
+clitable body "Row 1" ":Row 2" "Other Col"
 ```
 
 ## API Reference
@@ -93,11 +95,11 @@ clitable data "Row 1" ":Row 2" "Other Col"
 ### `print_line(columns, colsize=25, color1='36', color2='35', format_style='', is_centered=False)`
 Print a single line of table columns.
 
-### `print_block(rows, colsize=-1, color1='36', color2='35', format_style='', format_header='4;', is_centered=False)`
+### `print_block(rows, colsize=-1, color1='36', color2='35', format_style='', format_head='4;', is_centered=False)`
 Print a block of table rows.
 
-### `print_table(headers=None, data=None, colsize=-1)`
-Print a complete table with optional headers, data, and borders.
+### `print_table(heads=None, body=None, colsize=-1)`
+Print a complete table with optional heads, body, and borders.
 
 ## Development
 

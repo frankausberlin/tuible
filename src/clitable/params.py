@@ -11,77 +11,77 @@ class CliTableParams:
     """CLI Table Parameters
 
     This class encapsulates all configuration parameters for CLI table generation,
-    including formatting options, column data structures, and command-line argument parsing.
+    including formatting options, column body structures, and command-line argument parsing.
     It provides static methods for creating instances from command-line arguments and
     environment variables, and instance methods for parsing and validating input.
 
     The class manages:
     - Table formatting (colors, borders, alignment)
-    - Column data organization across different modes (header, data, borders)
+    - Column body organization across different modes (head, body, borders)
     - Command-line argument processing
     - Environment variable support for default settings
     - Dynamic column width calculation
     """
-    clitable_helptxt: str = """Simple table output CLI application
-
-Usage: clitable <mode> <data> [options]
+    clitable_helptxt: str = """CliTable - Simple table output CLI application
+==============================================
+Usage: clitable [options] <mode> [<body>] [options] [<mode> [<body>] ...] [options]
 
 Modes:
-  data    - Print data line
-  header  - Print header line
+  body    - Print body line
+  head  - Print head line
   top     - Print top border
-  bottom  - Print bottom border
+  bot  - Print bottom border
 
 Options:
   -ce <color>  - Set edge color (e.g., 34 for blue)
-  -cd <color>  - Set data color (e.g., 32 for green)
-  -ch <color>  - Set header color (e.g., 33 for yellow)
-  -fd <style>  - Set data style (e.g., 4 for underline)
-  -fh <style>  - Set header style (e.g., 4 for underline)
+  -cb <color>  - Set body color (e.g., 32 for green)
+  -ch <color>  - Set head color (e.g., 33 for yellow)
+  -fb <style>  - Set body style (e.g., 4 for underline)
+  -fh <style>  - Set head style (e.g., 4 for underline)
   -fe <chars>  - Set edge characters (8 chars: left-right, top-bottom, corners, middle)
                   Default: '┃━┏┓┗┛┳┻'
   -size <num>  - Set column width (default: 19)
                   Use -1 for dynamic width based on content
   -cc <num>    - Set column count
-  -fhc         - Set header alignment to center
-  -fhl         - Set header alignment to left
-  -fhr         - Set header alignment to right
-  -fdc         - Set data alignment to center
-  -fdl         - Set data alignment to left
-  -fdr         - Set data alignment to right
+  -fhc         - Set head alignment to center
+  -fhl         - Set head alignment to left
+  -fhr         - Set head alignment to right
+  -fbc         - Set body alignment to center
+  -fbl         - Set body alignment to left
+  -fbr         - Set body alignment to right
   -nb          - No border (left and right)
   -h, --help   - Show this help message
 
-Environment Variables:
-  CLITABLE_<option> - Set default values for options (e.g., CLITABLE_ce=31 for red edges)
-  Examples:
-    export CLITABLE_fe="║═╔╗╚╝╦╩"
-    export CLITABLE_size=25
-    export CLITABLE_nb=1
+Symbol Sets:
+  Default edge symbols: "┃━┏┓┗┛┳┻"
+  Other symbol sets:    "│─┌┐└┘┬┴", "║═╔╗╚╝╦╩", "│─╭╮╰╯┬┴", "┆┄┌┐└┘┬┴", "┇┉┏┓┗┛┳┻" 
 
-        print('Edge-Symbols: "│─┌┐└┘┬┴", "║═╔╗╚╝╦╩", "│─╭╮╰╯┬┴", "┆┄┌┐└┘┬┴", "┇┉┏┓┗┛┳┻"')
+Environment Variables:
+All parameters can also be set as environment variables. 
+The variable name must start with 'CLITABLE_', followed by the parameter. 
+For example, 
+  "export CLITABLE_fb='1;3;4;'" 
+has the same effect as passing the parameter directly when calling the function, like this: 
+  "-fb '1;3;4;'"
 
 Example:
-  export CLITABLE_fe='║═╔╗╚╝╦╩' &&\\
-    clitable top -cc 2 &&\\
-    clitable header 'title 1' 'title 2' &&\\
-    clitable data 'data 1' 'data 2' &&\\
-    clitable bottom -cc 2
+  export CLITABLE_fe='║═╔╗╚╝╦╩' 
+  clitable top head 'title 1' 'title 2' body 'body 1' 'body 2' bot
 """
     mode_columns:   Dict[str, List[List[str]]] = field(default_factory=dict)
-    alone_args:     List[str]       = field(default_factory=lambda: ["-fhc", "-fhl", "-fhr", "-fdc", 
-                                                                     "-fdl", "-fdr", "-nb", "-h", "--help"])
+    alone_args:     List[str]       = field(default_factory=lambda: ["-fhc", "-fhl", "-fhr", "-fbc", 
+                                                                     "-fbl", "-fbr", "-nb", "-h", "--help"])
     mode_stack:     List[str]       = field(default_factory=list)
     columns:        List[List[str]] = field(default_factory=list)
     current_mode:   str             = ""
-    data:           List            = field(default_factory=list)
+    body:           List            = field(default_factory=list)
     size:           int             = 19
     column_count:   Optional[int]   = None
     column_widths:  List[int]       = field(default_factory=list)
     no_border:      bool            = False
-    format_header:  Dict            = field(default_factory=lambda: {
+    format_head:  Dict            = field(default_factory=lambda: {
                                       'color': '104', 'esc': '1;3;4;', 'align': 'center' })
-    format_data:    Dict            = field(default_factory=lambda: {
+    format_body:    Dict            = field(default_factory=lambda: {
                                       'color': '96', 'esc': '', 'align': 'left' })
     format_edge:    Dict            = field(default_factory=lambda: {
                                       'color': '93', 'symbol_leftright': '┃', 'symbol_topbottom': '━',
@@ -111,19 +111,19 @@ Example:
             arg = sys_argv[i]
             if arg[0] == '-':
                 # Skip option and its value (if not a standalone option)
-                if arg not in ["-fhc", "-fhl", "-fhr", "-fdc", "-fdl", "-fdr", "-nb", "-h", "--help"]:
+                if arg not in ["-fhc", "-fhl", "-fhr", "-fbc", "-fbl", "-fbr", "-nb", "-h", "--help"]:
                     i += 2  # skip option and value
                 else:
                     i += 1  # skip standalone option
             else:
                 # Found a non-option argument
-                if arg in ["data", "header", "top", "bottom"]:
+                if arg in ["body", "head", "top", "bot"]:
                     mode_found = True
                     break
                 i += 1
         
         if not mode_found:
-            print("Usage: clitable data|header|top|bottom [data...] [options]")
+            print("Usage: clitable body|head|top|bot [body...] [options]")
             return None
 
         params = cls()
@@ -152,11 +152,11 @@ Example:
             # treat command or item
             if args[i][0] != '-':
 
-                # first none-'-'-parameter must be in ["data", "header", "top", "bottom"]
-                if self.current_mode == '' and args[i] not in ["data", "header", "top", "bottom"]:
-                    raise Exception(f"First argument must be one of data|header|top|bottom, got: {args[i]}")
+                # first none-'-'-parameter must be in ["body", "head", "top", "bot"]
+                if self.current_mode == '' and args[i] not in ["body", "head", "top", "bot"]:
+                    raise Exception(f"First argument must be one of body|head|top|bot, got: {args[i]}")
 
-                # handle commands and items (header/data)
+                # handle commands and items (head/body)
                 isItem = self._extractItems(args[i:])
                 if not isItem: # no item means
                     self.current_mode = args[i] # is a command
@@ -202,9 +202,9 @@ Example:
         
     def _extractItems(self, args: List[str]) -> bool:
         arg = args[0]
-        if arg in ["data", "header", "top", "bottom"]: return False
+        if arg in ["body", "head", "top", "bot"]: return False
 
-        # handle data argument starting with ':' (continuation in current column)
+        # handle body argument starting with ':' (continuation in current column)
         if arg[0] == ':':
             # check if we have a valid current column
             if self.col_pos < 0:
@@ -221,7 +221,7 @@ Example:
             # add empty string to start empty column
             self.columns[self.col_pos].append("")
         
-        # handle data as first item of its column (normal text)
+        # handle body as first item of its column (normal text)
         else:
             self.col_pos += 1
             # create new column if needed
@@ -240,17 +240,17 @@ Example:
             if arg == '-nb':
                 self.no_border = True
             elif arg == '-fhc':
-                self.format_header['align'] = 'center'
+                self.format_head['align'] = 'center'
             elif arg == '-fhl':
-                self.format_header['align'] = 'left'
+                self.format_head['align'] = 'left'
             elif arg == '-fhr':
-                self.format_header['align'] = 'right'
-            elif arg == '-fdc':
-                self.format_data['align'] = 'center'
-            elif arg == '-fdl':
-                self.format_data['align'] = 'left'
-            elif arg == '-fdr':
-                self.format_data['align'] = 'right'
+                self.format_head['align'] = 'right'
+            elif arg == '-fbc':
+                self.format_body['align'] = 'center'
+            elif arg == '-fbl':
+                self.format_body['align'] = 'left'
+            elif arg == '-fbr':
+                self.format_body['align'] = 'right'
             return 1  # consumed 1 argument
         else:
             # Handle parameters that require a value
@@ -260,14 +260,14 @@ Example:
             
             if arg == '-ce':      # edge color
                 self.format_edge['color'] = value
-            elif arg == '-cd':    # data color
-                self.format_data['color'] = value
-            elif arg == '-ch':    # header color
-                self.format_header['color'] = value
-            elif arg == '-fd':    # data format/escape codes
-                self.format_data['esc'] = value
-            elif arg == '-fh':    # header format/escape codes
-                self.format_header['esc'] = value
+            elif arg == '-cb':    # body color
+                self.format_body['color'] = value
+            elif arg == '-ch':    # head color
+                self.format_head['color'] = value
+            elif arg == '-fb':    # body format/escape codes
+                self.format_body['esc'] = value
+            elif arg == '-fh':    # head format/escape codes
+                self.format_head['esc'] = value
             elif arg == '-fe':    # edge characters (8 chars expected)
                 if len(value) >= 8:
                     self.format_edge['symbol_leftright'] = value[0]

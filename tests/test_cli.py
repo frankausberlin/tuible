@@ -20,9 +20,9 @@ class TestCLI:
         assert 'Usage: clitable' in output
 
     @patch('sys.stdout', new_callable=StringIO)
-    def test_cli_data_basic(self, mock_stdout):
-        """Test basic data command."""
-        test_args = ['clitable', 'data', 'col1', 'col2']
+    def test_cli_body_basic(self, mock_stdout):
+        """Test basic body command."""
+        test_args = ['clitable', 'body', 'col1', 'col2']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()
@@ -31,9 +31,9 @@ class TestCLI:
         assert '┃' in output
 
     @patch('sys.stdout', new_callable=StringIO)
-    def test_cli_header_basic(self, mock_stdout):
-        """Test basic header command."""
-        test_args = ['clitable', 'header', 'H1', 'H2']
+    def test_cli_head_basic(self, mock_stdout):
+        """Test basic head command."""
+        test_args = ['clitable', 'head', 'H1', 'H2']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()
@@ -45,10 +45,10 @@ class TestCLI:
     def test_cli_full_table(self, mock_stdout):
         """Test full table sequence (simulated by multiple calls or combined args)."""
         # The current CLI implementation in cli.py executes one set of params.
-        # source_clitable allowed multiple modes in one call if parsed correctly.
+        # clitable allows multiple modes in one call if parsed correctly.
         # Let's check parseArguments in params.py.
         # It loops through args and appends to mode_stack.
-        test_args = ['clitable', 'top', 'header', 'H1', 'data', 'D1', 'bottom', '-cc', '1']
+        test_args = ['clitable', 'top', 'head', 'H1', 'body', 'D1', 'bot', '-cc', '1']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()
@@ -60,7 +60,7 @@ class TestCLI:
     @patch('sys.stdout', new_callable=StringIO)
     def test_cli_no_border(self, mock_stdout):
         """Test no border option."""
-        test_args = ['clitable', 'data', 'test', '-nb']
+        test_args = ['clitable', 'body', 'test', '-nb']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()
@@ -70,17 +70,17 @@ class TestCLI:
     @patch('sys.stdout', new_callable=StringIO)
     def test_cli_custom_colors(self, mock_stdout):
         """Test custom colors."""
-        test_args = ['clitable', 'data', 'test', '-ce', '31', '-cd', '32']
+        test_args = ['clitable', 'body', 'test', '-ce', '31', '-cb', '32']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()
         assert '\x1b[31m' in output # Edge color
-        assert '\x1b[32m' in output # Data color
+        assert '\x1b[32m' in output # body color
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_cli_dynamic_size(self, mock_stdout):
         """Test dynamic sizing."""
-        test_args = ['clitable', 'data', 'very long string', '-size', '-1']
+        test_args = ['clitable', 'body', 'very long string', '-size', '-1']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()
