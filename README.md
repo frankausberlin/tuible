@@ -1,6 +1,3 @@
-This is a little vibe-coding-test with kilocode / x-ai code fast 1
-
-
 # clitable
 
 A Python package for printing formatted CLI tables with ANSI colors.
@@ -12,7 +9,8 @@ A Python package for printing formatted CLI tables with ANSI colors.
 - Customizable column widths and alignment
 - Header formatting with underline styles
 - Auto-sizing based on content
-- Command-line interface with rich help
+- Command-line interface with mode-stack support
+- Multi-row cells using colon prefix syntax
 
 ## Installation
 
@@ -31,7 +29,7 @@ uv pip install clitable
 ### Python API
 
 ```python
-from clitable import print_line, print_block
+from clitable import print_line, print_block, print_table
 
 # Print a single line
 print_line(['Name', 'Age', 'City'], colsize=15, color1='36', color2='35')
@@ -43,90 +41,70 @@ rows = [
     ['Jane', '30', 'London']
 ]
 print_block(rows, colsize=-1)  # Auto-size columns
+
+# Print a full table with borders
+print_table(headers=['Name', 'Age'], data=[['John', '25'], ['Jane', '30']])
 ```
 
 ### Command Line
 
-```bash
-# Print a single line
-clitable line "Name" "Age" "City"
+The CLI uses a mode-based approach where you can stack different parts of the table.
 
-# Print a table block
-clitable block --rows "Name Age City" "John 25 New York" "Jane 30 London"
+```bash
+# Print a single data line
+clitable data "Name" "Age" "City"
+
+# Print a header and data
+clitable header "Name" "Age" data "John" "25"
+
+# Print a full table with borders
+clitable top header "Name" "Age" data "John" "25" bottom -cc 2
 
 # With custom colors and formatting
-clitable line -c1 31 -c2 32 -centered "Centered Text"
+clitable data -ce 31 -cd 32 "Red Border" "Green Data"
+```
+
+#### Modes
+- `data`: Print data line
+- `header`: Print header line
+- `top`: Print top border
+- `bottom`: Print bottom border
+
+#### Options
+- `-ce <color>`: Set edge color (e.g., 34 for blue)
+- `-cd <color>`: Set data color (e.g., 32 for green)
+- `-ch <color>`: Set header color (e.g., 33 for yellow)
+- `-fd <style>`: Set data style (e.g., 4 for underline)
+- `-fh <style>`: Set header style
+- `-fe <chars>`: Set edge characters (8 chars: left-right, top-bottom, corners, middle)
+- `-size <num>`: Set column width (-1 for dynamic)
+- `-cc <num>`: Set column count
+- `-nb`: No border (left and right)
+
+### Multi-row Cells (Colon Mechanics)
+Elements starting with `:` are treated as continuations in the same column, allowing multi-row content within a single table column.
+
+```bash
+clitable data "Row 1" ":Row 2" "Other Col"
 ```
 
 ## API Reference
 
 ### `print_line(columns, colsize=25, color1='36', color2='35', format_style='', is_centered=False)`
-
 Print a single line of table columns.
 
-- `columns`: List of column values to print
-- `colsize`: Column width(s) - int for uniform, list for per-column
-- `color1`: ANSI color code for borders (default: '36' cyan)
-- `color2`: ANSI color code for data (default: '35' magenta)
-- `format_style`: Additional ANSI style (e.g., '1;' for bold)
-- `is_centered`: Center-align data
-
 ### `print_block(rows, colsize=-1, color1='36', color2='35', format_style='', format_header='4;', is_centered=False)`
-
 Print a block of table rows.
 
-- `rows`: List of rows, each row is a list of columns
-- `colsize`: Column width (-1 for auto-size)
-- `color1`: ANSI color code for borders
-- `color2`: ANSI color code for data
-- `format_style`: Style for data rows
-- `format_header`: Style for header row (default: '4;' underline)
-- `is_centered`: Center-align data
-
-### ANSI Colors
-
-Common ANSI color codes:
-- 30: Black
-- 31: Red
-- 32: Green
-- 33: Yellow
-- 34: Blue
-- 35: Magenta
-- 36: Cyan
-- 37: White
-
-Style codes:
-- 0: Reset
-- 1: Bold
-- 4: Underline
-- 7: Reverse
-
-## Examples
-
-### Basic Table
-
-```bash
-clitable block --rows "Product Price Stock" "Laptop 999 5" "Mouse 25 20" "Keyboard 75 8"
-```
-
-### Colored Output
-
-```bash
-clitable line -c1 32 -c2 33 "Success" "Operation completed"
-```
-
-### Centered Text
-
-```bash
-clitable line -centered -sz 20 "Centered Title"
-```
+### `print_table(headers=None, data=None, colsize=-1)`
+Print a complete table with optional headers, data, and borders.
 
 ## Development
 
 ### Setup
 
 ```bash
-git clone https://github.com/yourusername/clitable.git
+git clone https://github.com/frank/clitable.git
 cd clitable
 uv sync
 ```
@@ -134,19 +112,9 @@ uv sync
 ### Testing
 
 ```bash
-uv run pytest
-```
-
-### Building
-
-```bash
-uv build
+PYTHONPATH=src uv run pytest
 ```
 
 ## License
 
 MIT License - see LICENSE file for details.
-
-## Contributing
-
-Contributions welcome! Please feel free to submit a Pull Request.

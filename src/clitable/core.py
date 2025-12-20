@@ -1,7 +1,8 @@
 """Core functions for printing CLI tables."""
 
-from typing import List, Union, Any
-from .colors import ansi_color_code, reset_color
+from typing import List, Union, Any, Optional
+from .params import CliTableParams
+from .table import CliTable
 
 
 def print_line(
@@ -23,24 +24,25 @@ def print_line(
         format_style: Additional style for data (e.g., '4;' for underline).
         is_centered: Whether to center-align the data.
     """
+    params = CliTableParams()
+    params.format_edge['color'] = color1
+    params.format_data['color'] = color2
+    params.format_data['esc'] = format_style
+    params.format_data['align'] = 'center' if is_centered else 'left'
+    
     if isinstance(colsize, int):
-        col_sizes = [colsize] * len(columns)
+        params.size = colsize
+        params.column_count = len(columns)
     else:
-        col_sizes = colsize
+        params.column_widths = colsize
+        params.column_count = len(columns)
 
-    edge_format = ansi_color_code(color1)
-    data_format = ansi_color_code(color2, format_style)
-
-    for i, col in enumerate(columns):
-        if is_centered:
-            data_centered = str(col).center(col_sizes[i])
-        else:
-            data_centered = str(col).ljust(col_sizes[i])
-        # First column
-        if i == 0:
-            print(f"{edge_format}┃", end='')
-        print(f"{data_format}{data_centered}{edge_format}┃{reset_color()}", end='')
-    print()
+    # Prepare data mode
+    params.mode_stack = ['data']
+    params.mode_columns['data'] = [[str(col)] for col in columns]
+    
+    table = CliTable(params)
+    table.execute()
 
 
 def print_block(
@@ -67,16 +69,78 @@ def print_block(
     if not rows:
         return
 
+    params = CliTableParams()
+    params.format_edge['color'] = color1
+    params.format_data['color'] = color2
+    params.format_data['esc'] = format_style
+    params.format_data['align'] = 'center' if is_centered else 'left'
+    params.format_header['esc'] = format_header
+    params.size = colsize
+    
+    # In CliTableParams, data is stored as columns: List[List[str]]
+    # We need to transpose rows to columns
     num_cols = len(rows[0])
-    if colsize == -1:
-        col_sizes = [0] * num_cols
-        for row in rows:
-            for i, col in enumerate(row):
-                col_sizes[i] = max(col_sizes[i], len(str(col)))
-        col_sizes = [s + 2 for s in col_sizes]  # Add padding
-    else:
-        col_sizes = [colsize] * num_cols
+    header_row = rows[0]
+    data_rows = rows[1:]
+    
+    params.mode_stack = ['header', 'data']
+    
+    # Header columns
+    params.mode_columns['header'] = [[str(cell)] for cell in header_row]
+    
+    # Data columns
+    data_cols = [[] for _ in range(num_cols)]
+    for row in data_rows:
+        for i in range(num_cols):
+            val = str(row[i]) if i < len(row) else ""
+            data_cols[i].append(val)
+    params.mode_columns['data'] = data_cols
+    
+    params.column_count = num_cols
+    
+    table = CliTable(params)
+    table.execute()
 
-    for idx, row in enumerate(rows):
-        fmt = format_header if idx == 0 else format_style
-        print_line(row, col_sizes, color1, color2, fmt, is_centered)
+
+def print_table(
+    headers: Optional[List[str]] = None,
+    data: Optional[List[List[str]]] = None,
+    colsize: int = -1
+) -> None:
+    """
+    Print a complete table with optional headers, data, and borders.
+
+    Args:
+        headers: List of header strings
+        data: List of data rows
+        colsize: Column size (-1 for auto)
+    """
+    rows = []
+    if headers:
+        rows.append(headers)
+    if data:
+        rows.extend(data)
+    
+    if not rows:
+        return
+
+    params = CliTableParams()
+    params.size = colsize
+    params.mode_stack = ['top', 'header', 'data', 'bottom']
+    
+    num_cols = len(rows[0])
+    params.column_count = num_cols
+    
+    if headers:
+        params.mode_columns['header'] = [[str(cell)] for cell in headers]
+    
+    if data:
+        data_cols = [[] for _ in range(num_cols)]
+        for row in data:
+            for i in range(num_cols):
+                val = str(row[i]) if i < len(row) else ""
+                data_cols[i].append(val)
+        params.mode_columns['data'] = data_cols
+    
+    table = CliTable(params)
+    table.execute()

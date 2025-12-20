@@ -10,7 +10,7 @@ readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.8"
 authors = [
-    {name = "Frank", email = "frank@example.com"},
+    {name = "Frank", email = "frank@domain.com"},
 ]
 keywords = ["cli", "table", "terminal", "colors", "ansi"]
 classifiers = [
@@ -30,10 +30,10 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/yourusername/clitable"
-Repository = "https://github.com/yourusername/clitable"
-Issues = "https://github.com/yourusername/clitable/issues"
-Documentation = "https://github.com/yourusername/clitable#readme"
+Homepage = "https://github.com/frank/clitable"
+Repository = "https://github.com/frank/clitable"
+Issues = "https://github.com/frank/clitable/issues"
+Documentation = "https://github.com/frank/clitable#readme"
 
 [project.scripts]
 clitable = "clitable.cli:main"
