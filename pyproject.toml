@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "clitable"
+name = "tuible"
 version = "0.1.1"
 description = "A Python package for printing formatted CLI tables with ANSI colors"
 readme = "README.md"
@@ -30,19 +30,26 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/frank/clitable"
-Repository = "https://github.com/frank/clitable"
-Issues = "https://github.com/frank/clitable/issues"
-Documentation = "https://github.com/frank/clitable#readme"
+Homepage = "https://github.com/frank/tuible"
+Repository = "https://github.com/frank/tuible"
+Issues = "https://github.com/frank/tuible/issues"
+Documentation = "https://github.com/frank/tuible#readme"
 
 [project.scripts]
-clitable = "clitable.cli:main"
+tuible = "tuible.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/clitable"]
+packages = ["src/tuible"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+
+[dependency-groups]
+dev = [
+    "build>=1.2.2.post1",
+    "pytest>=8.3.5",
+    "twine>=6.1.0",
+]
