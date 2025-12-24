@@ -1,8 +1,8 @@
 """Core functions for printing CLI tables."""
 
 from typing import List, Union, Any, Optional
-from .params import CliTableParams
-from .table import CliTable
+from .params import TuibleParams
+from .table import TuibleTable
 
 
 def print_line(
@@ -24,7 +24,7 @@ def print_line(
         format_style: Additional style for body (e.g., '4;' for underline).
         is_centered: Whether to center-align the body.
     """
-    params = CliTableParams()
+    params = TuibleParams()
     params.format_edge['color'] = color1
     params.format_body['color'] = color2
     params.format_body['esc'] = format_style
@@ -41,7 +41,7 @@ def print_line(
     params.mode_stack = ['body']
     params.mode_columns['body'] = [[str(col)] for col in columns]
     
-    table = CliTable(params)
+    table = TuibleTable(params)
     table.execute()
 
 
@@ -69,7 +69,7 @@ def print_block(
     if not rows:
         return
 
-    params = CliTableParams()
+    params = TuibleParams()
     params.format_edge['color'] = color1
     params.format_body['color'] = color2
     params.format_body['esc'] = format_style
@@ -77,7 +77,7 @@ def print_block(
     params.format_head['esc'] = format_head
     params.size = colsize
     
-    # In CliTableParams, body is stored as columns: List[List[str]]
+    # In TuibleParams, body is stored as columns: List[List[str]]
     # We need to transpose rows to columns
     num_cols = len(rows[0])
     head_row = rows[0]
@@ -96,9 +96,11 @@ def print_block(
             body_cols[i].append(val)
     params.mode_columns['body'] = body_cols
     
+    # Set column count for proper width calculation
     params.column_count = num_cols
-    
-    table = CliTable(params)
+
+
+    table = TuibleTable(params)
     table.execute()
 
 
@@ -124,7 +126,7 @@ def print_table(
     if not rows:
         return
 
-    params = CliTableParams()
+    params = TuibleParams()
     params.size = colsize
     params.mode_stack = ['top', 'head', 'body', 'bot']
     
@@ -141,6 +143,7 @@ def print_table(
                 val = str(row[i]) if i < len(row) else ""
                 body_cols[i].append(val)
         params.mode_columns['body'] = body_cols
-    
-    table = CliTable(params)
+
+
+    table = TuibleTable(params)
     table.execute()
