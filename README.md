@@ -58,7 +58,7 @@ tuible body "Name" "Age" "City"
 tuible head "Name" "Age" body "John" "25"
 
 # Print a full table with borders
-tuible top head "Name" "Age" body "John" "25" bot -cc 2
+tuible top head "Name" "Age" body "John" "25" bot
 
 # With custom colors and formatting
 tuible body -ce 31 -cb 32 "Red Border" "Green body"
@@ -90,7 +90,6 @@ tuible body b1 head h1
 - `-fi <style>`: Set index style (e.g., 4 for underline, 1 for bold)
 - `-fe <chars>`: Set edge characters (8 chars: left-right, top-bottom, corners, middle)
 - `-size <num>`: Set column width (-1 for dynamic)
-- `-cc <num>`: Set column count
 - `-nb`: No border (left and right)
 - `-nhi`: Hide the auto-generated header index while auto-numbering
 - `-fic`: Center-align index column

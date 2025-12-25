@@ -55,7 +55,7 @@ class TestCLI:
         # tuible allows multiple modes in one call if parsed correctly.
         # Let's check parseArguments in params.py.
         # It loops through args and appends to mode_stack.
-        test_args = ['tuible', 'top', 'head', 'H1', 'body', 'D1', 'bot', '-cc', '1']
+        test_args = ['tuible', 'top', 'head', 'H1', 'body', 'D1', 'bot']
         with patch('sys.argv', test_args):
             main()
         output = mock_stdout.getvalue()

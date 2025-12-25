@@ -577,3 +577,5 @@ class TestTuibleTableIdx:
         output = mock_stdout.getvalue()
         # Check for bold style (1;)
         assert '\x1b[1;31m' in output
+
+

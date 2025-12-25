@@ -3,7 +3,7 @@
 import sys
 import os
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Any
 
 
 @dataclass
@@ -58,11 +58,10 @@ Head & body formatting:
    -fbc/-fbl/-fbr - align body text (center/left/right)
 
 Layout & borders:
-   -size <num>  - column width (-1 for dynamic sizing)
-   -cc <num>    - total column count (auto-detected by default)
-   -fe <chars>  - edge characters (8 chars: lr, tb, corners, middle)
-   -nb          - hide left/right borders for a compact display
-   -nhi         - hide the auto-generated header index when auto-numbering is enabled
+    -size <num>  - column width (-1 for dynamic sizing)
+    -fe <chars>  - edge characters (8 chars: lr, tb, corners, middle)
+    -nb          - hide left/right borders for a compact display
+    -nhi         - hide the auto-generated header index when auto-numbering is enabled
 
 ------------------------
 ⚙️ Environment variables
@@ -120,6 +119,8 @@ Use -h or --help for this message.
     index_body_values:   List[str] = field(default_factory=list)
     index_auto_numbering: bool       = False
     
+
+
     @staticmethod
     def print_help() -> None:
         """Print help information for the tuible application."""
@@ -366,8 +367,6 @@ Use -h or --help for this message.
                     self.format_edge['symbol_bottommiddle'] = value[7]
             elif arg == '-size':  # column width
                 self.size = int(value)
-            elif arg == '-cc':    # column count
-                self.column_count = int(value)
             else:
                 print(f"Warning: Unknown parameter {arg}")
             

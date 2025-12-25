@@ -42,7 +42,7 @@ class TuibleTable:
         """Initialize TuibleTable with parameters."""
         self.params = params
         self.format_index = params.format_index
-        if self.params.size == -1:
+        if self.params.size == -1 or 'idx' in self.params.mode_columns:
             self.calculate_dynamic_widths()
 
     def calculate_dynamic_widths(self) -> None:
@@ -67,11 +67,13 @@ class TuibleTable:
         for mode, columns in self.params.mode_columns.items():
             if mode == 'idx':
                 continue  # Already handled above
-            
+
             # Offset for other columns if index is present
             offset = 1 if 'idx' in self.params.mode_columns else 0
             for col_idx, column in enumerate(columns):
                 max_width = max((len(cell) for cell in column), default=0)
+                if self.params.size != -1:
+                    max_width = max(max_width, self.params.size)
                 if col_idx + offset < len(self.params.column_widths):
                     self.params.column_widths[col_idx + offset] = max(self.params.column_widths[col_idx + offset], max_width)
 
