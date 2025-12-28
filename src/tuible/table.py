@@ -107,8 +107,14 @@ class TuibleTable:
         col_count = self.params.column_count if self.params.column_count else len(self.params.columns)
 
         # Build top border
-        line = edge_color + self.params.format_edge['symbol_topleft']
-        for i in range(col_count):
+        if self.params.no_index_border and 'idx' in self.params.mode_columns:
+            idx_width = self.params.column_widths[0] if self.params.column_widths else self.params.size
+            line = ' ' * idx_width + edge_color + self.params.format_edge['symbol_topleft']
+            start_i = 1
+        else:
+            line = edge_color + self.params.format_edge['symbol_topleft']
+            start_i = 0
+        for i in range(start_i, col_count):
             width = self.params.column_widths[i] if self.params.column_widths else self.params.size
             line += self.params.format_edge['symbol_topbottom'] * width
             if i < col_count - 1:
@@ -128,8 +134,14 @@ class TuibleTable:
         col_count = self.params.column_count if self.params.column_count else len(self.params.columns)
 
         # Build bottom border
-        line = edge_color + self.params.format_edge['symbol_bottomleft']
-        for i in range(col_count):
+        if self.params.no_index_border and 'idx' in self.params.mode_columns:
+            idx_width = self.params.column_widths[0] if self.params.column_widths else self.params.size
+            line = ' ' * idx_width + edge_color + self.params.format_edge['symbol_bottomleft']
+            start_i = 1
+        else:
+            line = edge_color + self.params.format_edge['symbol_bottomleft']
+            start_i = 0
+        for i in range(start_i, col_count):
             width = self.params.column_widths[i] if self.params.column_widths else self.params.size
             line += self.params.format_edge['symbol_topbottom'] * width
             if i < col_count - 1:
@@ -178,7 +190,7 @@ class TuibleTable:
         reset = "\x1b[0m"
 
         # Start with left border
-        if not self.params.no_border:
+        if not self.params.no_border and not (self.params.no_index_border and 'idx' in self.params.mode_columns):
             print(edge_color + self.params.format_edge['symbol_leftright'], end='')
 
         # Print index cell if index is present
@@ -193,7 +205,12 @@ class TuibleTable:
             aligned_text = self._align_text(text, width, self.format_index['align'])
             print(index_color + aligned_text + reset, end='')
             if not self.params.no_border:
-                print(edge_color + self.params.format_edge['symbol_leftright'], end='')
+                if self.params.no_index_border:
+                    # Print the left border for the data section
+                    print(edge_color + self.params.format_edge['symbol_leftright'], end='')
+                else:
+                    # Print separator after index
+                    print(edge_color + self.params.format_edge['symbol_leftright'], end='')
 
         # Print each column's cell for this row
         for col_idx, column in enumerate(columns):

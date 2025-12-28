@@ -124,15 +124,6 @@ class TestCLI:
         assert 'b1' in stripped
         assert 'b2' in stripped
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_cli_index_alias(self, mock_stdout):
-        """Test that the index alias produces the same output."""
-        test_args = ['tuible', 'index', ':i1', 'body', 'data']
-        with patch('sys.argv', test_args):
-            main()
-        output = strip_ansi(mock_stdout.getvalue())
-        assert 'i1' in output
-        assert 'data' in output
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_cli_idx_after_top_allowed(self, mock_stdout):
@@ -420,3 +411,14 @@ class TestCLI:
         assert 'idx2' in stripped
         assert 'data1' in stripped
         assert 'data2' in stripped
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_cli_idx_no_index_border(self, mock_stdout):
+        """Test idx with -nib parameter (no index border)."""
+        test_args = ['tuible', 'idx', '1', 'body', 'data', '-nib']
+        with patch('sys.argv', test_args):
+            main()
+        output = strip_ansi(mock_stdout.getvalue())
+        # With -nib, index should be followed by data with border
+        assert '1┃data' in output  # index followed by border and data
+        assert '┃1' not in output  # should not have left border before index

@@ -284,12 +284,13 @@ class TestTuibleParamsIdx:
         params.parseArguments(args)
         assert not params.index_auto_numbering
 
-    def test_index_command_alias_is_supported(self):
+
+    def test_nib_parameter(self):
+        """Test -nib parameter sets no_index_border."""
         params = TuibleParams()
-        args = ['index', ':i1', 'body', 'B1']
+        args = ['idx', '1', 'body', 'data', '-nib']
         params.parseArguments(args)
-        assert 'idx' in params.mode_columns
-        assert params.mode_stack[0] == 'idx'
+        assert params.no_index_border == True
 
 
 class TestTuibleTableIdx:
@@ -309,17 +310,6 @@ class TestTuibleTableIdx:
         assert 'data1' in output
         assert 'data2' in output
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_render_index_alias(self, mock_stdout):
-        """Ensure the alias `index` renders the same index column."""
-        params = TuibleParams()
-        args = ['index', ':i1', 'body', 'data']
-        params.parseArguments(args)
-        table = TuibleTable(params)
-        table.execute()
-        output = strip_ansi(mock_stdout.getvalue())
-        assert 'i1' in output
-        assert 'data' in output
 
     @patch('sys.stdout', new_callable=StringIO)
     def test_render_idx_with_head(self, mock_stdout):
@@ -577,5 +567,18 @@ class TestTuibleTableIdx:
         output = mock_stdout.getvalue()
         # Check for bold style (1;)
         assert '\x1b[1;31m' in output
+
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_render_idx_no_index_border(self, mock_stdout):
+        """Test idx rendering with -nib (no index border)."""
+        params = TuibleParams()
+        args = ['idx', '1', 'body', 'data', '-nib']
+        params.parseArguments(args)
+        table = TuibleTable(params)
+        table.execute()
+        output = strip_ansi(mock_stdout.getvalue())
+        # With -nib, index should be followed by data with border
+        assert '1┃data' in output  # index followed by border and data
+        assert '┃1' not in output  # should not have left border before index
 
 

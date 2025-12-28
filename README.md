@@ -64,10 +64,10 @@ tuible top head "Name" "Age" body "John" "25" bot
 tuible body -ce 31 -cb 32 "Red Border" "Green body"
 
 # With index column (numbered rows)
-tuible top head "Name" "Age" index body "Alice" "25" body "Bob" "30" bot
+tuible top head "Name" "Age" idx body "Alice" "25" body "Bob" "30" bot
 
 # With index and custom colors
-tuible -ch 33 -ci 35 -fic index top head "Item" "Quantity" body "Apples" "5" body "Oranges" "3" bot
+tuible -ch 33 -ci 35 -fic idx top head "Item" "Quantity" body "Apples" "5" body "Oranges" "3" bot
 
 # The order doesn't matter.
 tuible body b1 head h1
@@ -76,7 +76,7 @@ tuible body b1 head h1
 #### Modes
 - `body`: Print body line
 - `head`: Print head line
-- `index` / `idx`: Add an index column before the rest of the table (must come before head/body)
+- `idx`: Add an index column before the rest of the table (must come before head/body)
 - `top`: Print top border
 - `bot`: Print bottom border
 
@@ -92,13 +92,14 @@ tuible body b1 head h1
 - `-size <num>`: Set column width (-1 for dynamic)
 - `-nb`: No border (left and right)
 - `-nhi`: Hide the auto-generated header index while auto-numbering
+- `-nib`: No index border (removes separator between index and data columns)
 - `-fic`: Center-align index column
 - `-fil`: Left-align index column
 - `-fir`: Right-align index column
 
 ### Index Column
 
-The `index` command reserves the leftmost column for explicit labels or auto-numbering. It must appear before `head` or `body` in the invocation. Provide plain labels (e.g., `i1`) for header rows and colon-prefixed labels (e.g., `:i1`) for body rows. Omitting all labels triggers auto-numbering (header rows start at `0`, body rows begin at `1`). Use empty strings (`''`) when you need a blank placeholder, and let the column width grow to the widest provided label (auto-numbering keeps a fixed 3-character width).
+The `idx` command reserves the leftmost column for explicit labels or auto-numbering. It must appear before `head` or `body` in the invocation. Provide plain labels (e.g., `i1`) for header rows and colon-prefixed labels (e.g., `:i1`) for body rows. Omitting all labels triggers auto-numbering (header rows start at `0`, body rows begin at `1`). Use empty strings (`''`) when you need a blank placeholder, and let the column width grow to the widest provided label (auto-numbering keeps a fixed 3-character width).
 
 By default the index column renders in red italic text, but you can override the color and style with `-ci`/`-fi`.
 
@@ -106,7 +107,7 @@ By default the index column renders in red italic text, but you can override the
 
 **Example 1 - Header + body labels:**
 ```bash
-tuible index 'ih' ':i1' ':i2' head 'h1' 'h2' body 'b1' ':b11' 'b2' ':b21'
+tuible idx 'ih' ':i1' ':i2' head 'h1' 'h2' body 'b1' ':b11' 'b2' ':b21'
 ```
 ```
 ┃ih┃h1 ┃h2 ┃
@@ -125,12 +126,24 @@ tuible idx ':i1' ':i2' body b1 :b11 '' :b21
 
 **Example 3 - Auto-numbering:**
 ```bash
-tuible index head 'col1' 'col2' body 'b1' ':b11' '' ':b21'
+tuible idx head 'col1' 'col2' body 'b1' ':b11' '' ':b21'
 ```
 ```
 ┃  0┃col1┃col2┃
 ┃  1┃b1  ┃    ┃
 ┃  2┃b11 ┃b21 ┃
+```
+
+**Example 4 - No index border:**
+```bash
+tuible top idx head 'col1' 'col2' body 'b1' ':b11' '' ':b21' bot -nib
+```
+```
+   ┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┓
+  0┃       col1        ┃       col2        ┃
+  1┃b1                 ┃                   ┃
+  2┃b11                ┃b21                ┃
+   ┗━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━┛
 ```
 
 ## Multi-row Cells (Colon Mechanics)

@@ -29,7 +29,7 @@ Create expressive CLI tables with colors, borders, and auto sizing in seconds.
 🧭 Modes
 -----------
    top        - draw the top border
-   index/idx  - dedicate the first column to an index column (must come before head/body)
+   idx        - dedicate the first column to an index column (must come before head/body)
    head       - add header row(s)
    body       - add body row(s)
    bot        - draw the bottom border
@@ -58,10 +58,11 @@ Head & body formatting:
    -fbc/-fbl/-fbr - align body text (center/left/right)
 
 Layout & borders:
-    -size <num>  - column width (-1 for dynamic sizing)
-    -fe <chars>  - edge characters (8 chars: lr, tb, corners, middle)
-    -nb          - hide left/right borders for a compact display
-    -nhi         - hide the auto-generated header index when auto-numbering is enabled
+     -size <num>  - column width (-1 for dynamic sizing)
+     -fe <chars>  - edge characters (8 chars: lr, tb, corners, middle)
+     -nb          - hide left/right borders for a compact display
+     -nhi         - hide the auto-generated header index when auto-numbering is enabled
+     -nib         - no index border (removes separator between index and data columns)
 
 ------------------------
 ⚙️ Environment variables
@@ -71,21 +72,28 @@ Prefix options with 'TUIBLE_' to set defaults (e.g., TUIBLE_ci=35 for a magenta 
 📚 Index examples
 -----------------
 Example 1 - Header + body labels:
-   tuible index 'ih' ':i1' ':i2' head 'h1' 'h2' body 'b1' ':b11' 'b2' ':b21'
-   ┃ih┃h1 ┃h2 ┃
-   ┃i1┃b1 ┃b2 ┃
-   ┃i2┃b11┃b21┃
+    tuible idx 'ih' ':i1' ':i2' head 'h1' 'h2' body 'b1' ':b11' 'b2' ':b21'
+    ┃ih┃        h1         ┃        h2         ┃
+    ┃i1┃b1                 ┃b2                 ┃
+    ┃i2┃b11                ┃b21                ┃
+
 
 Example 2 - Body-only labels:
-   tuible idx ':i1' ':i2' body b1 :b11 '' :b21
-   ┃i1┃b1 ┃   ┃
-   ┃i2┃b11┃b21┃
+    tuible idx ':i1' ':i2' body b1 :b11 '' :b21
+    ┃i1┃b1                 ┃                   ┃
+    ┃i2┃b11                ┃b21                ┃
 
-Example 3 - Auto-numbering:
-   tuible index head 'col1' 'col2' body 'b1' ':b11' '' ':b21'
-   ┃  0┃col1┃col2┃
-   ┃  1┃b1  ┃    ┃
-   ┃  2┃b11 ┃b21 ┃
+
+Example 3 - Auto-numbering and Auto-size:
+    tuible idx head 'col1' 'col2' body 'b1' ':b11' '' ':b21' -size -1
+    ┃  0┃col1┃col2┃
+    ┃  1┃b1  ┃    ┃
+    ┃  2┃b11 ┃b21 ┃
+
+Try this:
+* tuible top idx head col1 col2 body b1 :b11 b2 :b21 bot -nhi -nib -fbr
+* tuible idx head col1 col2 body b1 :b11 b2 :b21 -nhi -ch 32 -fh '2;3;4;9;' -nib
+
 
 Usage: tuible [options] <mode> [<mode arguments>] ... [options]
 Use -h or --help for this message.
@@ -93,8 +101,8 @@ Use -h or --help for this message.
 
     mode_columns:   Dict[str, List[List[str]]] = field(default_factory=dict)
     alone_args:     List[str]       = field(default_factory=lambda: ["-fhc", "-fhl", "-fhr", "-fbc",
-                                                                      "-fbl", "-fbr", "-fic", "-fil", "-fir",
-                                                                      "-nhi", "-nb", "-h", "--help"])
+                                                                       "-fbl", "-fbr", "-fic", "-fil", "-fir",
+                                                                       "-nhi", "-nb", "-nib", "-h", "--help"])
     mode_stack:     List[str]       = field(default_factory=list)
     columns:        List[List[str]] = field(default_factory=list)
     current_mode:   str             = ""
@@ -115,6 +123,7 @@ Use -h or --help for this message.
     format_index:   Dict            = field(default_factory=lambda: {
                                           'color': '31', 'esc': '3;', 'align': 'right', 'size': 3 })
     no_header_index: bool            = False
+    no_index_border: bool            = False
     index_header_values: List[str] = field(default_factory=list)
     index_body_values:   List[str] = field(default_factory=list)
     index_auto_numbering: bool       = False
@@ -156,7 +165,7 @@ Use -h or --help for this message.
                 i += 1
         
         if not mode_found:
-            print("Usage: tuible body|head|top|bot|idx|index [body...] [options]")
+            print("Usage: tuible body|head|top|bot|idx [body...] [options]")
             return None
 
         params = cls()
@@ -185,12 +194,11 @@ Use -h or --help for this message.
             arg = args[i]
             if not arg.startswith('-'):
                 # Handle commands and items
-                valid_modes = ["body", "head", "top", "bot", "idx", "index"]
+                valid_modes = ["body", "head", "top", "bot", "idx"]
                 
                 if arg in valid_modes:
                     # It's a command/mode switch
-                    canonical = 'idx' if arg == 'index' else arg
-                    self.current_mode = canonical
+                    self.current_mode = arg
                     self._validateCommandPosition(self.current_mode)
                     self.mode_stack.append(self.current_mode)
                     self.is_index_mode = (self.current_mode == 'idx')
@@ -316,6 +324,8 @@ Use -h or --help for this message.
                 self.no_border = True
             elif arg == '-nhi':
                 self.no_header_index = True
+            elif arg == '-nib':
+                self.no_index_border = True
             elif arg == '-fhc':
                 self.format_head['align'] = 'center'
             elif arg == '-fhl':
